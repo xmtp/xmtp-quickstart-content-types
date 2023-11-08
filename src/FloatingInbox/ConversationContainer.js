@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { MessageContainer } from "./MessageContainer";
 import { ethers } from "ethers";
+import { MessageContainer } from "./MessageContainer";
+import { ListConversations } from "./ListConversations";
+import { ListConversations as ListConversationsConsent } from "./ListConversations-consent";
 
 export const ConversationContainer = ({
   client,
   selectedConversation,
   setSelectedConversation,
+  isContained = false,
+  isPWA = false,
+  isConsent = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [peerAddress, setPeerAddress] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingResolve, setLoadingResolve] = useState(false);
-
   const [canMessage, setCanMessage] = useState(false);
-  const [conversations, setConversations] = useState([]);
+  const [conversationFound, setConversationFound] = useState(false);
+  const [createNew, setCreateNew] = useState(false);
 
   const styles = {
     conversations: {
@@ -82,55 +87,6 @@ export const ConversationContainer = ({
     },
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    let stream;
-
-    const fetchAndStreamConversations = async () => {
-      setLoading(true);
-      const allConversations = await client.conversations.list();
-
-      const sortedConversations = allConversations.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      if (isMounted) {
-        setConversations(sortedConversations);
-      }
-      setLoading(false);
-
-      stream = await client.conversations.stream();
-      for await (const conversation of stream) {
-        console.log(
-          `New conversation started with ${conversation.peerAddress}`
-        );
-        if (isMounted) {
-          setConversations((prevConversations) => {
-            const newConversations = [...prevConversations, conversation];
-            return newConversations.sort(
-              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-            );
-          });
-        }
-        break;
-      }
-    };
-
-    fetchAndStreamConversations();
-
-    return () => {
-      isMounted = false;
-      if (stream) {
-        stream.return();
-      }
-    };
-  }, []);
-  const filteredConversations = conversations.filter(
-    (conversation) =>
-      conversation?.peerAddress
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) &&
-      conversation?.peerAddress !== client.address
-  );
   const selectConversation = async (conversation) => {
     setSelectedConversation(conversation);
   };
@@ -140,6 +96,8 @@ export const ConversationContainer = ({
   };
 
   const handleSearchChange = async (e) => {
+    setCreateNew(false);
+    setConversationFound(false);
     setSearchTerm(e.target.value);
     console.log("handleSearchChange", e.target.value);
     setMessage("Searching...");
@@ -154,6 +112,7 @@ export const ConversationContainer = ({
       } catch (error) {
         console.log(error);
         setMessage("Error resolving address");
+        setCreateNew(false);
       } finally {
         setLoadingResolve(false);
       }
@@ -165,7 +124,8 @@ export const ConversationContainer = ({
     } else {
       setMessage("Invalid Ethereum address");
       setPeerAddress(null);
-      setCanMessage(false);
+      setCreateNew(false);
+      //setCanMessage(false);
     }
   };
 
@@ -173,22 +133,27 @@ export const ConversationContainer = ({
     setPeerAddress(address);
     if (address === client.address) {
       setMessage("No self messaging allowed");
+      setCreateNew(false);
       // setCanMessage(false);
     } else {
       const canMessageStatus = await client?.canMessage(address);
       if (canMessageStatus) {
         setPeerAddress(address);
-        setCanMessage(true);
+        // setCanMessage(true);
         setMessage("Address is on the network ✅");
+        setCreateNew(true);
       } else {
-        setCanMessage(false);
+        //  setCanMessage(false);
         setMessage("Address is not on the network ❌");
+        setCreateNew(false);
       }
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{ textAlign: "center", fontSize: "small" }}>Loading...</div>
+    );
   }
   return (
     <div style={styles.conversations}>
@@ -202,52 +167,49 @@ export const ConversationContainer = ({
             style={styles.peerAddressInput}
           />
           {loadingResolve && searchTerm && <small>Resolving address...</small>}
-          {filteredConversations.length > 0 ? (
-            filteredConversations.map((conversation, index) => (
-              <li
-                key={index}
-                onClick={() => {
-                  selectConversation(conversation);
-                }}
-                style={styles.conversationListItem}
-              >
-                <div style={styles.conversationDetails}>
-                  <span style={styles.conversationName}>
-                    {conversation.peerAddress.substring(0, 6) +
-                      "..." +
-                      conversation.peerAddress.substring(
-                        conversation.peerAddress.length - 4
-                      )}
-                  </span>
-                  <span style={styles.messagePreview}>...</span>
-                </div>
-                <div style={styles.conversationTimestamp}>
-                  {getRelativeTimeLabel(conversation.createdAt)}
-                </div>
-              </li>
-            ))
+          {isConsent ? (
+            <ListConversationsConsent
+              isPWA={isPWA}
+              client={client}
+              searchTerm={searchTerm}
+              selectConversation={setSelectedConversation}
+              onConversationFound={(state) => {
+                setConversationFound(state);
+                if (state == true) setCreateNew(false);
+              }}
+            />
           ) : (
-            <>
-              {message && <small>{message}</small>}
-              {peerAddress && canMessage && (
-                <button
-                  onClick={() => {
-                    setSelectedConversation({ messages: [] });
-                  }}
-                  style={styles.createNewButton}
-                >
-                  Create new conversation
-                </button>
-              )}
-            </>
+            <ListConversations
+              isPWA={isPWA}
+              client={client}
+              searchTerm={searchTerm}
+              selectConversation={setSelectedConversation}
+              onConversationFound={(state) => {
+                setConversationFound(state);
+                if (state == true) setCreateNew(false);
+              }}
+            />
+          )}
+          {message && conversationFound !== true && <small>{message}</small>}
+          {peerAddress && canMessage && (
+            <button
+              style={styles.createNewButton}
+              onClick={() => {
+                setSelectedConversation({ messages: [] });
+              }}
+            >
+              Create new conversation
+            </button>
           )}
         </ul>
       )}
       {selectedConversation && (
         <MessageContainer
           client={client}
+          isContained={isContained}
           conversation={selectedConversation}
           searchTerm={searchTerm}
+          isConsent={isConsent}
           selectConversation={selectConversation}
         />
       )}

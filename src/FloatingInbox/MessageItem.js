@@ -17,7 +17,6 @@ const styles = {
   },
   RenderedMessage: {
     fontSize: "12px",
-    wordBreak: "break-word",
     padding: "0px",
   },
   EmojiPickerContainer: {
@@ -42,13 +41,11 @@ const styles = {
   MessageContent: {
     backgroundColor: "lightblue",
     padding: "5px 10px",
-    alignSelf: "flex-start",
     textAlign: "left",
     display: "inline-block",
     margin: "5px",
     borderRadius: "5px",
     maxWidth: "80%",
-    wordBreak: "break-word",
     cursor: "pointer",
     listStyle: "none",
   },
@@ -58,31 +55,37 @@ const styles = {
     fontSize: "10px",
   },
   SenderMessage: {
-    alignSelf: "flex-start",
-    textAlign: "right",
+    textAlign: "left",
     listStyle: "none",
+    width: "100%",
   },
   ReceiverMessage: {
-    alignSelf: "flex-end",
-    listStyle: "none",
     textAlign: "right",
+    listStyle: "none",
+    width: "100%",
   },
   Footer: {
-    display: "flex",
+    display: "block",
     alignItems: "center",
     justifyContent: "flex-end",
   },
   TimeStamp: {
     fontSize: "8px",
     color: "grey",
+    display: "block",
+    width: "100%",
   },
   UnreadCheckmark: {
     color: "grey",
+    display: "block",
     fontSize: "8px",
+    width: "100%",
   },
   ReadCheckmark: {
     color: "blue",
+    display: "block",
     fontSize: "8px",
+    width: "100%",
   },
 };
 
@@ -113,7 +116,8 @@ const EmojiPicker = ({ onSelect }) => {
           key={index}
           onClick={() => onSelect(emoji)}
           role="img"
-          aria-label={`emoji-${index}`}>
+          aria-label={`emoji-${index}`}
+        >
           {emoji}
         </span>
       ))}
@@ -204,13 +208,12 @@ const MessageItem = ({
 
   const isSender = senderAddress === client?.address;
 
-  const MessageComponent = isSender ? "li" : "li";
-
   return (
-    <MessageComponent
+    <li
       style={isSender ? styles.SenderMessage : styles.ReceiverMessage}
       key={message.id}
-      onClick={handleLeftClick}>
+      onClick={handleLeftClick}
+    >
       <div style={styles.MessageContent}>
         {originalMessage && (
           <div style={styles.OriginalMessage}>{originalMessage.content}</div>
@@ -219,7 +222,7 @@ const MessageItem = ({
         <div style={styles.Footer}>
           <span style={styles.TimeStamp}>
             {`${new Date(message.sent).getHours()}:${String(
-              new Date(message.sent).getMinutes(),
+              new Date(message.sent).getMinutes()
             ).padStart(2, "0")}`}
           </span>
           {isRead ? (
@@ -236,13 +239,14 @@ const MessageItem = ({
             className="emoji-reaction"
             onClick={() => handleEmojiPick(emoji)}
             role="img"
-            aria-label={`emoji-reaction-${index}`}>
+            aria-label={`emoji-reaction-${index}`}
+          >
             {emoji}
           </span>
         ))}
         {showEmojiPicker && <EmojiPicker onSelect={handleSelect} />}
       </div>
-    </MessageComponent>
+    </li>
   );
 };
 export default MessageItem;
