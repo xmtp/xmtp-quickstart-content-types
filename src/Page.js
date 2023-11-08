@@ -118,7 +118,7 @@ const InboxPage = () => {
           Logout
         </button>
       )}
-      <h1>UInbox </h1>
+      <h1>Floating Inbox </h1>
 
       <section className="App-section">
         <button
