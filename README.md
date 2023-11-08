@@ -23,3 +23,9 @@ Head to our docs to understand our concepts with our react SDK
 - [Reply](https://xmtp.org/docs/build/messages/reply)
 - [Reaction](https://xmtp.org/docs/build/messages/reaction)
 - [Read receipt](https://xmtp.org/docs/build/messages/read-receipt)
+
+#### Troubleshooting
+
+If you get into issues with `Buffer` and `polyfills` check out the fix below:
+
+- [Check out Buffer issue](https://github.com/xmtp/xmtp-js/issues/487)
