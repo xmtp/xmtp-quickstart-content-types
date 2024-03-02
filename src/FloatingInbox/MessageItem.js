@@ -116,8 +116,7 @@ const EmojiPicker = ({ onSelect }) => {
           key={index}
           onClick={() => onSelect(emoji)}
           role="img"
-          aria-label={`emoji-${index}`}
-        >
+          aria-label={`emoji-${index}`}>
           {emoji}
         </span>
       ))}
@@ -189,7 +188,11 @@ const MessageItem = ({
         //No render reactions
       } else if (message.contentType.sameAs(ContentTypeReply)) {
         console.log("message.content.content", message.content.content);
-        return <>{message?.content?.content}</>;
+        const messageContent =
+          typeof message?.content?.content === "object" //Check if reply is not just text but an onother content type
+            ? message.content.content.content
+            : message.content.content;
+        return <>{messageContent}</>;
       } else if (message.contentType.sameAs(ContentTypeReadReceipt)) {
         //No render reactions
       } else if (message?.content.length > 0) {
@@ -212,8 +215,7 @@ const MessageItem = ({
     <li
       style={isSender ? styles.SenderMessage : styles.ReceiverMessage}
       key={message.id}
-      onClick={handleLeftClick}
-    >
+      onClick={handleLeftClick}>
       <div style={styles.MessageContent}>
         {originalMessage && (
           <div style={styles.OriginalMessage}>{originalMessage.content}</div>
@@ -222,7 +224,7 @@ const MessageItem = ({
         <div style={styles.Footer}>
           <span style={styles.TimeStamp}>
             {`${new Date(message.sent).getHours()}:${String(
-              new Date(message.sent).getMinutes()
+              new Date(message.sent).getMinutes(),
             ).padStart(2, "0")}`}
           </span>
           {isRead ? (
@@ -239,8 +241,7 @@ const MessageItem = ({
             className="emoji-reaction"
             onClick={() => handleEmojiPick(emoji)}
             role="img"
-            aria-label={`emoji-reaction-${index}`}
-          >
+            aria-label={`emoji-reaction-${index}`}>
             {emoji}
           </span>
         ))}

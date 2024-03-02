@@ -8,6 +8,7 @@ import {
   RemoteAttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
 import { ReactionCodec } from "@xmtp/content-type-reaction";
+import { ContentTypeMultiplyNumberCodec } from "./Custom";
 import { ReplyCodec } from "@xmtp/content-type-reply";
 import { ReadReceiptCodec } from "@xmtp/content-type-read-receipt";
 
@@ -259,6 +260,7 @@ export function FloatingInbox({
     xmtp.registerCodec(new AttachmentCodec());
     xmtp.registerCodec(new RemoteAttachmentCodec());
     xmtp.registerCodec(new ReplyCodec());
+    xmtp.registerCodec(new ContentTypeMultiplyNumberCodec());
     xmtp.registerCodec(new ReactionCodec());
     xmtp.registerCodec(new ReadReceiptCodec());
 
@@ -279,16 +281,14 @@ export function FloatingInbox({
             "FloatingInbox " +
             (isOpen ? "spin-clockwise" : "spin-counter-clockwise")
           }
-          style={styles.FloatingLogo}
-        >
+          style={styles.FloatingLogo}>
           💬
         </div>
       )}
       {isOpen && (
         <div
           style={styles.uContainer}
-          className={" " + (isOnNetwork ? "expanded" : "")}
-        >
+          className={" " + (isOnNetwork ? "expanded" : "")}>
           {isConnected && (
             <button style={styles.logoutBtn} onClick={handleLogout}>
               Logout
@@ -302,8 +302,7 @@ export function FloatingInbox({
                     style={styles.backButton}
                     onClick={() => {
                       setSelectedConversation(null);
-                    }}
-                  >
+                    }}>
                     ←
                   </button>
                 )}
@@ -372,7 +371,7 @@ export const loadKeys = (walletAddress) => {
 export const storeKeys = (walletAddress, keys) => {
   localStorage.setItem(
     buildLocalStorageKey(walletAddress),
-    Buffer.from(keys).toString(ENCODING)
+    Buffer.from(keys).toString(ENCODING),
   );
 };
 
