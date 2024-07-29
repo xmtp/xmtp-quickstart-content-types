@@ -81,6 +81,37 @@ export const MessageInput = ({
     onFileUpload(file);
   };
 
+  const [newMessage, setNewMessage] = useState("");
+  const [image, setImage] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const mediaRecorderRef = useRef(null);
+
+  // ... existing code ...
+
+  const handleAudioStart = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        setAudioBlob(event.data);
+      };
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    });
+  };
+
+  const handleAudioStop = () => {
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  };
+
+  const handleAudioSend = () => {
+    if (audioBlob) {
+      onAudioUpload(audioBlob);
+      setAudioBlob(null);
+    }
+  };
+
   return (
     <div
       style={styles.newMessageContainer}
@@ -121,6 +152,16 @@ export const MessageInput = ({
             }}>
             Send
           </button>
+          <button
+            style={styles.sendButton}
+            onClick={isRecording ? handleAudioStop : handleAudioStart}>
+            {isRecording ? "Stop Recording" : "Record Audio"}
+          </button>
+          {audioBlob && (
+            <button style={styles.sendButton} onClick={handleAudioSend}>
+              Send Audio
+            </button>
+          )}
         </>
       )}
     </div>
