@@ -234,7 +234,7 @@ export const MessageContainer = ({
       });
 
       const attachment = {
-        filename: image?.name ?? "audio-" + Math.random(),
+        filename: image?.name ?? "audio-" + Math.random() * 1000,
         mimeType: image?.type,
         data: new Uint8Array(data),
       };
@@ -265,7 +265,7 @@ export const MessageContainer = ({
 
       const client = await create();
       await client.setCurrentSpace(
-        "did:key:z6MkprmMQrqftHmnJw3Yqp5m4sjfszQsm2buumdd7CuXpcV1",
+        "did:key:z6MkfYm6sjRmBXxQk1dcy2WEeDeJfdw1xt2oc6CJu1buprmz",
       );
       const cid = await client.uploadFile(upload);
 
