@@ -7,9 +7,9 @@ import {
 import { MessageInput } from "./MessageInput";
 import MessageItem from "./MessageItem";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
-import { ContentTypeReply, Reply } from "@xmtp/content-type-reply";
+import { ContentTypeReply } from "@xmtp/content-type-reply";
 import { ContentTypeMultiplyNumbers } from "./Custom";
-import { ContentTypeText } from "@xmtp/xmtp-js";
+import { create } from "@web3-storage/w3up-client";
 import { ContentTypeReadReceipt } from "@xmtp/content-type-read-receipt";
 
 export const MessageContainer = ({
@@ -234,11 +234,12 @@ export const MessageContainer = ({
       });
 
       const attachment = {
-        filename: image?.name,
+        filename: image?.name ?? "audio-" + Math.random(),
         mimeType: image?.type,
         data: new Uint8Array(data),
       };
 
+      console.log(attachment);
       const encryptedEncoded = await RemoteAttachmentCodec.encodeEncrypted(
         attachment,
         new AttachmentCodec(),
@@ -261,14 +262,14 @@ export const MessageContainer = ({
         }
       }
       const upload = new Upload(attachment.filename, encryptedEncoded.payload);
-      const { Web3Storage } = require("web3.storage");
-      const web3Storage = new Web3Storage({
-        token: process.env.REACT_APP_WEB3STORAGE_KEY,
-      });
 
-      const cid = await web3Storage.put([upload]);
-      const url = `https://${cid}.ipfs.w3s.link/` + attachment.filename;
+      const client = await create();
+      await client.setCurrentSpace(
+        "did:key:z6MkprmMQrqftHmnJw3Yqp5m4sjfszQsm2buumdd7CuXpcV1",
+      );
+      const cid = await client.uploadFile(upload);
 
+      const url = `https://${cid}.ipfs.w3s.link/`;
       setLoadingText(url);
       const remoteAttachment = {
         url: url,
@@ -350,6 +351,7 @@ export const MessageContainer = ({
               let originalMessage = messages.find(
                 (m) => m.id === message.content.reference,
               );
+
               return (
                 <MessageItem
                   key={

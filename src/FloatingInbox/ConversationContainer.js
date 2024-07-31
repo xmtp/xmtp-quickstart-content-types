@@ -139,11 +139,11 @@ export const ConversationContainer = ({
       const canMessageStatus = await client?.canMessage(address);
       if (canMessageStatus) {
         setPeerAddress(address);
-        // setCanMessage(true);
+        setCanMessage(true);
         setMessage("Address is on the network ✅");
         setCreateNew(true);
       } else {
-        //  setCanMessage(false);
+        setCanMessage(false);
         setMessage("Address is not on the network ❌");
         setCreateNew(false);
       }
@@ -196,8 +196,7 @@ export const ConversationContainer = ({
               style={styles.createNewButton}
               onClick={() => {
                 setSelectedConversation({ messages: [] });
-              }}
-            >
+              }}>
               Create new conversation
             </button>
           )}

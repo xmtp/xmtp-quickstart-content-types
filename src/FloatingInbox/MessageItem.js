@@ -174,7 +174,18 @@ const MessageItem = ({
 
   const renderMessage = (message) => {
     try {
-      if (message.contentType.sameAs(ContentTypeRemoteAttachment)) {
+      if (
+        message.contentType.sameAs(ContentTypeRemoteAttachment) &&
+        message.content.filename.includes("audio")
+      ) {
+        console.log(message);
+        return (
+          <audio controls>
+            <source src={imgSrc} />
+            Your browser does not support the audio element.
+          </audio>
+        );
+      } else if (message.contentType.sameAs(ContentTypeRemoteAttachment)) {
         return (
           <>
             {imgSrc ? (
