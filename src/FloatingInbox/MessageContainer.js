@@ -188,7 +188,6 @@ export const MessageContainer = ({
       alert("empty message");
       return;
     }
-    console.log(image);
     if (image) {
       //await handleLargeFile(image);
       await handleSmallFile(image);
@@ -230,7 +229,6 @@ export const MessageContainer = ({
       mimeType: file.type,
       data: imgArray,
     };
-    console.log(attachment);
     await conversation.send(attachment, { contentType: ContentTypeAttachment });
   };
 
@@ -355,13 +353,11 @@ export const MessageContainer = ({
             client,
           );
         } else if (message.contentType.sameAs(ContentTypeAttachment)) {
-          console.log(message.content);
           newImageSources[message.id] = URL.createObjectURL(
             new Blob([Buffer.from(message.content.data)], {
               type: message.content.mimeType,
             }),
           );
-          console.log(newImageSources[message.id]);
         }
       }
 

@@ -110,7 +110,6 @@ export const MessageInput = ({
   };
 
   const handleSend = () => {
-    console.log(image ?? audioBlob);
     onSendMessage(newMessage, image ?? audioBlob, replyingToMessage);
     setImage(null);
     setAudioBlob(null);

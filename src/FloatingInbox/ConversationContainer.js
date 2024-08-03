@@ -99,7 +99,6 @@ export const ConversationContainer = ({
     setCreateNew(false);
     setConversationFound(false);
     setSearchTerm(e.target.value);
-    console.log("handleSearchChange", e.target.value);
     setMessage("Searching...");
     const addressInput = e.target.value;
     const isEthDomain = /\.eth$/.test(addressInput);
@@ -110,14 +109,12 @@ export const ConversationContainer = ({
         const provider = new ethers.providers.CloudflareProvider();
         resolvedAddress = await provider.resolveName(resolvedAddress);
       } catch (error) {
-        console.log(error);
         setMessage("Error resolving address");
         setCreateNew(false);
       } finally {
         setLoadingResolve(false);
       }
     }
-    console.log("resolvedAddress", resolvedAddress);
     if (resolvedAddress && isValidEthereumAddress(resolvedAddress)) {
       processEthereumAddress(resolvedAddress);
       setSearchTerm(resolvedAddress); // <-- Add this line

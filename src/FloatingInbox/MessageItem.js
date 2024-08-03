@@ -218,7 +218,6 @@ const MessageItem = ({
       } else if (message.contentType.sameAs(ContentTypeReaction)) {
         //No render reactions
       } else if (message.contentType.sameAs(ContentTypeReply)) {
-        console.log("message.content.content", message.content.content);
         const messageContent =
           typeof message?.content?.content === "object" //Check if reply is not just text but an onother content type
             ? message.content.content.content
