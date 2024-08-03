@@ -93,7 +93,10 @@ export const MessageInput = ({
       mediaRecorderRef.current.onstop = () => {
         const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
         setAudioBlob(audioBlob); // Set the audioBlob state
-        setNewMessage("audio");
+        const audioDuration =
+          audioChunks.reduce((total, chunk) => total + chunk.size, 0) /
+          (16 * 1024); // Assuming 16kbps bitrate
+        setNewMessage(`${audioDuration.toFixed(2)} seconds`);
         setIsRecording(false);
         onFileUpload(audioBlob); // Upload the audio file here
       };

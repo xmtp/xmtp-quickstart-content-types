@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   ContentTypeRemoteAttachment,
+  ContentTypeAttachment,
   RemoteAttachmentCodec,
   AttachmentCodec,
 } from "@xmtp/content-type-remote-attachment";
@@ -187,8 +188,10 @@ export const MessageContainer = ({
       alert("empty message");
       return;
     }
+    console.log(image);
     if (image) {
-      await handleLargeFile(image);
+      //await handleLargeFile(image);
+      await handleSmallFile(image);
     } else {
       if (conversation && conversation.peerAddress) {
         if (replyingToMessage && replyingToMessage.id) {
@@ -216,7 +219,32 @@ export const MessageContainer = ({
 
     setImage(null);
   };
-  const handleLargeFile = async (image) => {
+  // Function to handle sending a small file attachment
+  const handleSmallFile = async (file) => {
+    // Convert the file to a Uint8Array
+    const blob = new Blob([file], { type: file.type });
+    let imgArray = new Uint8Array(await blob.arrayBuffer());
+
+    const attachment = {
+      filename: file?.name ?? "audio",
+      mimeType: file.type,
+      data: imgArray,
+    };
+    console.log(attachment);
+    await conversation.send(attachment, { contentType: ContentTypeAttachment });
+  };
+
+  async function uploadtow3(upload) {
+    const client = await create();
+    const myAccount = await client.login("fguespe@gmail.com");
+    const space = await client.createSpace("my-awesome-space");
+    await myAccount.provision(space.did());
+    await space.save();
+    await client.setCurrentSpace(space.did());
+    const cid = await client.uploadFile(upload);
+    return cid;
+  }
+  const handleLargeFile = async (file) => {
     setIsLoadingUpload(true);
     setLoadingText("Uploading...");
 
@@ -230,16 +258,15 @@ export const MessageContainer = ({
             reject(new Error("Not an ArrayBuffer"));
           }
         };
-        reader.readAsArrayBuffer(image);
+        reader.readAsArrayBuffer(file);
       });
 
       const attachment = {
-        filename: image?.name ?? "audio-" + Math.random() * 1000,
-        mimeType: image?.type,
+        filename: file?.name ?? "audio",
+        mimeType: file?.type,
         data: new Uint8Array(data),
       };
 
-      console.log(attachment);
       const encryptedEncoded = await RemoteAttachmentCodec.encodeEncrypted(
         attachment,
         new AttachmentCodec(),
@@ -263,11 +290,7 @@ export const MessageContainer = ({
       }
       const upload = new Upload(attachment.filename, encryptedEncoded.payload);
 
-      const client = await create();
-      await client.setCurrentSpace(
-        "did:key:z6MkfYm6sjRmBXxQk1dcy2WEeDeJfdw1xt2oc6CJu1buprmz",
-      );
-      const cid = await client.uploadFile(upload);
+      const cid = await uploadtow3(upload);
 
       const url = `https://${cid}.ipfs.w3s.link/`;
       setLoadingText(url);
@@ -331,6 +354,15 @@ export const MessageContainer = ({
             message,
             client,
           );
+          console.log(newImageSources[message.id]);
+        } else if (message.contentType.sameAs(ContentTypeAttachment)) {
+          console.log(message.content);
+          newImageSources[message.id] = URL.createObjectURL(
+            new Blob([Buffer.from(message.content.data)], {
+              type: message.content.mimeType,
+            }),
+          );
+          console.log(newImageSources[message.id]);
         }
       }
 

@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ContentTypeRemoteAttachment } from "@xmtp/content-type-remote-attachment";
+import {
+  ContentTypeRemoteAttachment,
+  ContentTypeAttachment,
+} from "@xmtp/content-type-remote-attachment";
 import { ContentTypeReaction } from "@xmtp/content-type-reaction";
 import { ContentTypeReply } from "@xmtp/content-type-reply";
 import { ContentTypeReadReceipt } from "@xmtp/content-type-read-receipt";
@@ -171,23 +174,40 @@ const MessageItem = ({
     event.stopPropagation();
     setShowEmojiPicker(!showEmojiPicker);
   };
+  const [audioSrc, setAudioSrc] = useState(imgSrc);
 
+  useEffect(() => {
+    setAudioSrc(imgSrc);
+  }, [imgSrc]);
   const renderMessage = (message) => {
     try {
       if (
-        message.contentType.sameAs(ContentTypeRemoteAttachment) &&
+        (message.contentType.sameAs(ContentTypeRemoteAttachment) ||
+          message.contentType.sameAs(ContentTypeAttachment)) &&
         message.content.filename.includes("audio")
       ) {
-        console.log(message);
-        return (
-          <audio controls>
-            <source src={imgSrc} />
-            Your browser does not support the audio element.
-          </audio>
-        );
-      } else if (message.contentType.sameAs(ContentTypeRemoteAttachment)) {
         return (
           <>
+            {message.id}
+            <audio
+              controls
+              style={{ maxWidth: "100%" }}
+              id={`audio-${message.id}`}
+              onLoadedData={(e) => console.log("Audio loaded data:", e.target)}
+              onError={(e) => console.error("Audio error:", e.target.error)}
+              onCanPlay={(e) => console.log("Audio can play:", e.target)}>
+              <source src={audioSrc} />
+              Your browser does not support the audio element.
+            </audio>
+          </>
+        );
+      } else if (
+        message.contentType.sameAs(ContentTypeRemoteAttachment) ||
+        message.contentType.sameAs(ContentTypeAttachment)
+      ) {
+        return (
+          <>
+            {imgSrc}
             {imgSrc ? (
               <img src={imgSrc} alt="Attachment" style={{ maxWidth: "100%" }} />
             ) : (
