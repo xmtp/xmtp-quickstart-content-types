@@ -354,7 +354,6 @@ export const MessageContainer = ({
             message,
             client,
           );
-          console.log(newImageSources[message.id]);
         } else if (message.contentType.sameAs(ContentTypeAttachment)) {
           console.log(message.content);
           newImageSources[message.id] = URL.createObjectURL(
@@ -389,7 +388,8 @@ export const MessageContainer = ({
                   key={
                     message.id +
                     "-" +
-                    Array.from(message.reactions ?? []).length
+                    Array.from(message.reactions ?? []).length +
+                    imageSources[message.id]
                   }
                   message={message}
                   originalMessage={originalMessage}
